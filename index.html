@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Münzen-Katalog</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+    <header>
+        <h1>Münzen-Katalog: Prüfmerkmale von Gold- und Silbermünzen</h1>
+        <nav>
+            <button onclick="showAll('Gold')">Alle Goldmünzen</button>
+            <button onclick="showAll('Silver')">Alle Silbermünzen</button>
+            <button onclick="showAddForm()">Münze hinzufügen</button>
+            <input type="text" id="searchInput" placeholder="Suche nach Münze..." oninput="searchCoins()">
+        </nav>
+    </header>
+    <main>
+        <div id="coinList"></div>
+        <div id="addForm" style="display:none;">
+            <h2>Münze hinzufügen/editieren</h2>
+            <form id="coinForm">
+                <label>ID (nur bei neu anlegen): <input type="text" name="ID" placeholder="z. B. 018"></label>
+                <label>Coin_Name: <input type="text" name="Coin_Name"></label>
+                <label>Metal_Type: <select name="Metal_Type"><option>Gold</option><option>Silver</option></select></label>
+                <label>Denomination: <input type="text" name="Denomination"></label>
+                <label>Country: <input type="text" name="Country"></label>
+                <label>Mint: <input type="text" name="Mint"></label>
+                <label>Face_Value: <input type="text" name="Face_Value"></label>
+                <label>Total_Weight_g: <input type="text" name="Total_Weight_g"></label>
+                <label>Fine_Weight_oz: <input type="text" name="Fine_Weight_oz"></label>
+                <label>Fineness: <input type="text" name="Fineness"></label>
+                <label>Diameter_mm: <input type="text" name="Diameter_mm"></label>
+                <label>Thickness_mm: <input type="text" name="Thickness_mm"></label>
+                <label>Edge: <input type="text" name="Edge" placeholder="reeded, plain, lettered"></label>
+                <label>Magnetism: <input type="text" name="Magnetism"></label>
+                <label>Years_Issued: <input type="text" name="Years_Issued"></label>
+                <label>Description: <textarea name="Description"></textarea></label>
+                <label>Notes: <textarea name="Notes"></textarea></label>
+                <label>Front_Image: <input type="file" name="Front_Image" accept="image/*"></label>
+                <label>Back_Image: <input type="file" name="Back_Image" accept="image/*"></label>
+                <button type="button" onclick="saveCoin()">Speichern</button>
+            </form>
+        </div>
+    </main>
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="document.getElementById('imageModal').style.display='none'">&times;</span>
+        <img class="modal-content" id="modalImage">
+        <div id="caption"></div>
+    </div>
+    <script src="scripts/script.js"></script>
+</body>
+</html>
