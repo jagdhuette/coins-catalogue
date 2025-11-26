@@ -5,52 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Münzen-Katalog</title>
     <link rel="stylesheet" href="styles/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <h1>Münzen-Katalog: Prüfmerkmale von Gold- und Silbermünzen</h1>
-        <nav>
-            <button onclick="showAll('Gold')">Alle Goldmünzen</button>
-            <button onclick="showAll('Silver')">Alle Silbermünzen</button>
+    <div class="container">
+        <header class="header">
+            <h1>Münzen-Katalog</h1>
+            <h2>Prüfmerkmale von Gold- und Silbermünzen</h2>
+        </header>
+
+        <nav class="nav">
+            <button onclick="showAll('Gold')">Goldmünzen</button>
+            <button onclick="showAll('Silver')">Silbermünzen</button>
             <button onclick="showAddForm()">Münze hinzufügen</button>
-            <input type="text" id="searchInput" placeholder="Suche nach Münze..." oninput="searchCoins()">
+            <button onclick="downloadCSV()" class="download-btn">CSV herunterladen</button>
+            <input type="text" id="searchInput" placeholder="Suche nach Name, Stückelung oder ID..." oninput="searchCoins()">
         </nav>
-    </header>
-    <main>
-        <div id="coinList"></div>
-        <div id="addForm" style="display:none;">
-            <h2>Münze hinzufügen/bearbeiten</h2>
-            <form id="coinForm">
-                <label>ID (nur bei neu anlegen): <input type="text" name="ID" placeholder="z. B. 018"></label>
-                <label>Münzenname: <input type="text" name="Coin_Name"></label>
-                <label>Metalltyp: <select name="Metal_Type"><option>Gold</option><option>Silber</option></select></label>
-                <label>Stückelung: <input type="text" name="Denomination"></label>
-                <label>Land: <input type="text" name="Country"></label>
-                <label>Prägestätte: <input type="text" name="Mint"></label>
-                <label>Nennwert: <input type="text" name="Face_Value"></label>
-                <label>Gesamtgewicht (g): <input type="text" name="Total_Weight_g"></label>
-                <label>Feingewicht (oz): <input type="text" name="Fine_Weight_oz"></label>
-                <label>Feingehalt: <input type="text" name="Fineness"></label>
-                <label>Durchmesser (mm): <input type="text" name="Diameter_mm"></label>
-                <label>Dicke (mm): <input type="text" name="Thickness_mm"></label>
-                <label>Rand: <input type="text" name="Edge" placeholder="geriffelt, glatt, beschriftet"></label>
-                <label>Magnetismus: <input type="text" name="Magnetism"></label>
-                <label>Jahrgänge: <input type="text" name="Years_Issued"></label>
-                <label>Beschreibung: <textarea name="Description"></textarea></label>
-                <label>Bemerkungen: <textarea name="Notes"></textarea></label>
-                <label>Vorderseite (Datei): <input type="file" name="Front_Image" accept="image/*"></label>
-                <label>Vorderseite (URL alternative): <input type="text" name="Front_URL" placeholder="https://beispiel.com/vorderseite.jpg"></label>
-                <label>Rückseite (Datei): <input type="file" name="Back_Image" accept="image/*"></label>
-                <label>Rückseite (URL alternative): <input type="text" name="Back_URL" placeholder="https://beispiel.com/rueckseite.jpg"></label>
-                <button type="button" onclick="saveCoin()">Speichern</button>
-            </form>
-        </div>
-    </main>
-    <div id="imageModal" class="modal">
-        <span class="close" onclick="document.getElementById('imageModal').style.display='none'">&times;</span>
-        <img class="modal-content" id="modalImage">
-        <div id="caption"></div>
+
+        <main>
+            <div id="coinList" class="grid"></div>
+
+            <div id="addForm" class="form-card">
+                <h2 id="formTitle">Münze hinzufügen</h2>
+                <form id="coinForm">
+                    <div class="form-grid">
+                        <label>ID (automatisch): <input type="text" name="ID" readonly></label>
+                        <label>Münzenname: <input type="text" name="Coin_Name" required></label>
+                        <label>Metall: 
+                            <select name="Metal_Type">
+                                <option>Gold</option>
+                                <option>Silber</option>
+                            </select>
+                        </label>
+                        <label>Stückelung: <input type="text" name="Denomination" required></label>
+                        <label>Land: <input type="text" name="Country" required></label>
+                        <label>Prägestätte: <input type="text" name="Mint"></label>
+                        <label>Nennwert: <input type="text" name="Face_Value"></label>
+                        <label>Gesamtgewicht (g): <input type="text" name="Total_Weight_g" required></label>
+                        <label>Feingewicht (oz): <input type="text" name="Fine_Weight_oz" required></label>
+                        <label>Feingehalt: <input type="text" name="Fineness" required></label>
+                        <label>Durchmesser (mm): <input type="text" name="Diameter_mm" required></label>
+                        <label>Dicke (mm): <input type="text" name="Thickness_mm" required></label>
+                        <label>Rand: <input type="text" name="Edge" placeholder="z. B. geriffelt"></label>
+                        <label>Magnetismus: <input type="text" name="Magnetism"></label>
+                        <label>Jahrgänge: <input type="text" name="Years_Issued"></label>
+                        <label>Beschreibung: <textarea name="Description"></textarea></label>
+                        <label>Bemerkungen: <textarea name="Notes"></textarea></label>
+                        <label>Vorderseite (Datei): <input type="file" name="Front_Image" accept="image/*"></label>
+                        <label>Vorderseite (URL): <input type="text" name="Front_URL" placeholder="https://..."></label>
+                        <label>Rückseite (Datei): <input type="file" name="Back_Image" accept="image/*"></label>
+                        <label>Rückseite (URL): <input type="text" name="Back_URL" placeholder="https://..."></label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" onclick="saveCoin()">Speichern</button>
+                        <button type="button" onclick="cancelForm()">Abbrechen</button>
+                    </div>
+                </form>
+            </div>
+        </main>
     </div>
+
+    <!-- Bild-Modal -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <img id="modalImage" src="" alt="Vergrößertes Bild">
+        </div>
+    </div>
+
     <script src="scripts/script.js"></script>
 </body>
 </html>
