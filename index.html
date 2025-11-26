@@ -17,58 +17,34 @@
         <nav class="nav">
             <button onclick="showAll('Gold')">Goldmünzen</button>
             <button onclick="showAll('Silver')">Silbermünzen</button>
+            <button onclick="showAll('all')">Alle Münzen</button>
+            <select id="weightFilter" onchange="filterByWeight()">
+                <option value="">Alle Gewichte</option>
+                <option value="1" selected>1 oz</option>
+                <option value="0.5">½ oz</option>
+                <option value="0.25">¼ oz</option>
+                <option value="0.1">1/10 oz</option>
+                <option value="2">2 oz</option>
+                <option value="10">10 oz</option>
+            </select>
             <button onclick="showAddForm()">Münze hinzufügen</button>
-            <button onclick="downloadCSV()" class="download-btn">CSV herunterladen</button>
-            <input type="text" id="searchInput" placeholder="Suche nach Name, Stückelung oder ID..." oninput="searchCoins()">
+            <button onclick="downloadCSV()" class="download-btn">CSV exportieren</button>
+            <input type="text" id="searchInput" placeholder="Suche..." oninput="searchCoins()">
+            <button onclick="resetFilters()" class="reset-btn">Zurücksetzen</button>
         </nav>
 
-        <main>
+        <main id="mainContent">
             <div id="coinList" class="grid"></div>
-
-            <div id="addForm" class="form-card">
-                <h2 id="formTitle">Münze hinzufügen</h2>
-                <form id="coinForm">
-                    <div class="form-grid">
-                        <label>ID (automatisch): <input type="text" name="ID" readonly></label>
-                        <label>Münzenname: <input type="text" name="Coin_Name" required></label>
-                        <label>Metall: 
-                            <select name="Metal_Type">
-                                <option>Gold</option>
-                                <option>Silber</option>
-                            </select>
-                        </label>
-                        <label>Stückelung: <input type="text" name="Denomination" required></label>
-                        <label>Land: <input type="text" name="Country" required></label>
-                        <label>Prägestätte: <input type="text" name="Mint"></label>
-                        <label>Nennwert: <input type="text" name="Face_Value"></label>
-                        <label>Gesamtgewicht (g): <input type="text" name="Total_Weight_g" required></label>
-                        <label>Feingewicht (oz): <input type="text" name="Fine_Weight_oz" required></label>
-                        <label>Feingehalt: <input type="text" name="Fineness" required></label>
-                        <label>Durchmesser (mm): <input type="text" name="Diameter_mm" required></label>
-                        <label>Dicke (mm): <input type="text" name="Thickness_mm" required></label>
-                        <label>Rand: <input type="text" name="Edge" placeholder="z. B. geriffelt"></label>
-                        <label>Magnetismus: <input type="text" name="Magnetism"></label>
-                        <label>Jahrgänge: <input type="text" name="Years_Issued"></label>
-                        <label>Beschreibung: <textarea name="Description"></textarea></label>
-                        <label>Bemerkungen: <textarea name="Notes"></textarea></label>
-                        <label>Vorderseite (Datei): <input type="file" name="Front_Image" accept="image/*"></label>
-                        <label>Vorderseite (URL): <input type="text" name="Front_URL" placeholder="https://..."></label>
-                        <label>Rückseite (Datei): <input type="file" name="Back_Image" accept="image/*"></label>
-                        <label>Rückseite (URL): <input type="text" name="Back_URL" placeholder="https://..."></label>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" onclick="saveCoin()">Speichern</button>
-                        <button type="button" onclick="cancelForm()">Abbrechen</button>
-                    </div>
-                </form>
-            </div>
         </main>
+
+        <!-- Formular (wird dynamisch eingefügt) -->
+        <div id="editContainer" style="display:none;"></div>
     </div>
 
     <!-- Bild-Modal -->
-    <div id="imageModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close" onclick="closeModal()">×</span>
             <img id="modalImage" src="" alt="Vergrößertes Bild">
         </div>
     </div>
