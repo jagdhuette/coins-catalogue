@@ -3,76 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Münzen-Katalog</title>
-    <link rel="stylesheet" href="styles/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Münz-Sammlung Verwaltung</title>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1>Münzen-Katalog</h1>
-            <h2>Prüfmerkmale von Gold- und Silbermünzen</h2>
-        </header>
+<div class="container">
+    <h1>Münz-Sammlung Verwaltung</h1>
 
-        <nav class="nav">
-            <button onclick="showAll('Gold')">Goldmünzen</button>
-            <button onclick="showAll('Silver')">Silbermünzen</button>
-            <button onclick="showAddForm()">Münze hinzufügen</button>
-            <button onclick="downloadCSV()" class="download-btn">CSV herunterladen</button>
-            <input type="text" id="searchInput" placeholder="Suche nach Name, Stückelung oder ID..." oninput="searchCoins()">
-        </nav>
+    <div class="filter-bar">
+        <label>Feingewicht filtern:</label>
+        <select id="weightFilter">
+            <option value="all">Alle</option>
+            <option value="1 Oz" selected>1 Oz</option>
+            <option value="1/2 Oz">1/2 Oz</option>
+            <option value="1/4 Oz">1/4 Oz</option>
+            <option value="1/10 Oz">1/10 Oz</option>
+            <option value="2 Oz">2 Oz</option>
+            <option value="5 Oz">5 Oz</option>
+            <option value="10 Oz">10 Oz</option>
+            <option value="1 kg">1 kg</option>
+        </select>
 
-        <main>
-            <div id="coinList" class="grid"></div>
-
-            <div id="addForm" class="form-card">
-                <h2 id="formTitle">Münze hinzufügen</h2>
-                <form id="coinForm">
-                    <div class="form-grid">
-                        <label>ID (automatisch): <input type="text" name="ID" readonly></label>
-                        <label>Münzenname: <input type="text" name="Coin_Name" required></label>
-                        <label>Metall: 
-                            <select name="Metal_Type">
-                                <option>Gold</option>
-                                <option>Silber</option>
-                            </select>
-                        </label>
-                        <label>Stückelung: <input type="text" name="Denomination" required></label>
-                        <label>Land: <input type="text" name="Country" required></label>
-                        <label>Prägestätte: <input type="text" name="Mint"></label>
-                        <label>Nennwert: <input type="text" name="Face_Value"></label>
-                        <label>Gesamtgewicht (g): <input type="text" name="Total_Weight_g" required></label>
-                        <label>Feingewicht (oz): <input type="text" name="Fine_Weight_oz" required></label>
-                        <label>Feingehalt: <input type="text" name="Fineness" required></label>
-                        <label>Durchmesser (mm): <input type="text" name="Diameter_mm" required></label>
-                        <label>Dicke (mm): <input type="text" name="Thickness_mm" required></label>
-                        <label>Rand: <input type="text" name="Edge" placeholder="z. B. geriffelt"></label>
-                        <label>Magnetismus: <input type="text" name="Magnetism"></label>
-                        <label>Jahrgänge: <input type="text" name="Years_Issued"></label>
-                        <label>Beschreibung: <textarea name="Description"></textarea></label>
-                        <label>Bemerkungen: <textarea name="Notes"></textarea></label>
-                        <label>Vorderseite (Datei): <input type="file" name="Front_Image" accept="image/*"></label>
-                        <label>Vorderseite (URL): <input type="text" name="Front_URL" placeholder="https://..."></label>
-                        <label>Rückseite (Datei): <input type="file" name="Back_Image" accept="image/*"></label>
-                        <label>Rückseite (URL): <input type="text" name="Back_URL" placeholder="https://..."></label>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" onclick="saveCoin()">Speichern</button>
-                        <button type="button" onclick="cancelForm()">Abbrechen</button>
-                    </div>
-                </form>
-            </div>
-        </main>
+        <button class="btn btn-add" onclick="newEntry()">Neue Münze hinzufügen</button>
+        
+        <input type="file" id="csvUpload" accept=".csv">
+        <span id="csvStatus"></span>
     </div>
 
-    <!-- Bild-Modal -->
-    <div id="imageModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <img id="modalImage" src="" alt="Vergrößertes Bild">
-        </div>
+    <!-- Globales Formular (wird geklont und inline eingefügt) -->
+    <div id="formTemplate" class="form-container">
+        <h2 id="formTitle">Neue Münze hinzufügen</h2>
+        <input type="hidden" id="editId">
+
+        <div class="form-row"><label>Name:</label>           <input type="text" id="name"></div>
+        <div class="form-row"><label>Jahr:</label>           <input type="text" id="year"></div>
+        <div class="form-row"><label>Land:</label>           <input type="text" id="country"></div>
+        <div class="form-row"><label>Nennwert:</label>       <input type="text" id="faceValue"></div>
+        <div class="form-row"><label>Feingewicht:</label>    <select id="fineWeight">
+            <option>1 Oz</option><option>1/2 Oz</option><option>1/4 Oz</option><option>1/10 Oz</option>
+            <option>2 Oz</option><option>5 Oz</option><option>10 Oz</option><option>1 kg</option>
+        </select></div>
+        <div class="form-row"><label>Gewicht (g):</label>    <input type="text" id="weight"></div>
+        <div class="form-row"><label>Material:</label>       <input type="text" id="material"></div>
+        <div class="form-row"><label>Auflage:</label>        <input type="text" id="minted"></div>
+        <div class="form-row"><label>Kaufpreis (€):</label>  <input type="text" id="purchasePrice"></div>
+        <div class="form-row"><label>Kaufdatum:</label>      <input type="date" id="purchaseDate"></div>
+        <div class="form-row"><label>Verkaufspreis (€):</label><input type="text" id="sellPrice"></div>
+        <div class="form-row"><label>Verkaufsdatum:</label>  <input type="date" id="sellDate"></div>
+
+        <button class="btn btn-save" onclick="saveEntry()">Speichern</button>
+        <button class="btn btn-cancel" onclick="cancelEdit()">Abbrechen</button>
     </div>
 
-    <script src="scripts/script.js"></script>
+    <div id="coinsContainer"></div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
