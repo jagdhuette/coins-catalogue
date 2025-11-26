@@ -1,168 +1,166 @@
 let coins = [];
-let currentEditIndex = -1;
+let editingIndex = -1;
+const CSV_URL = 'https://raw.githubusercontent.com/jagdhuette/coins-catalogue/main/data/catalog.csv';
 
-// --- Datumskonvertierung ---
-const toDE = (iso) => !iso ? "" : iso.split('-').reverse().join('.');
-const toISO = (de) => !de ? "" : de.split('.').reverse().join('-');
+function formatDate(dateStr) {
+    if (!dateStr) return 'unbekannt';
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
 
-// --- CSV Import ---
-document.getElementById("csvUpload").addEventListener("change", e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    document.getElementById("csvStatus").textContent = "Lade CSV...";
+async function loadCSV() {
+    try {
+        const resp = await fetch(CSV_URL + '?t=' + Date.now());
+        if (!resp.ok) throw new Error();
+        const text = await resp.text();
 
-    Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: results => {
-            coins = results.data.map(row => ({
-                ...row,
-                created: toISO(row.created) || new Date().toISOString().slice(0,10),
-                modified: toISO(row.modified) || new Date().toISOString().slice(0,10),
-                purchaseDate: row.purchaseDate || "",
-                sellDate: row.sellDate || ""
-            }));
-            renderCoins();
-            document.getElementById("csvStatus").textContent = `✓ ${coins.length} Münzen geladen`;
-        },
-        error: err => {
-            document.getElementById("csvStatus").textContent = "Fehler beim Laden der CSV";
-            console.error(err);
-        }
-    });
-});
-
-// --- Rendern ---
-function renderCoins() {
-    const container = document.getElementById("coinsContainer");
-    const filter = document.getElementById("weightFilter").value;
-    container.innerHTML = "";
-
-    coins
-        .filter(c => filter === "all" || c.fineWeight === filter)
-        .forEach((coin, i) => {
-            const div = document.createElement("div");
-            div.className = "coin-entry";
-            div.id = `coin-${i}`;
-            div.innerHTML = `
-                <h3>\( {coin.name || "Unbenannt"} ( \){coin.year || "?"}) – ${coin.fineWeight || ""}</h3>
-                <p><strong>Land:</strong> \( {coin.country || ""} | <strong>Nennwert:</strong> \){coin.faceValue || ""} | <strong>Material:</strong> ${coin.material || ""}</p>
-                <p><strong>Kauf:</strong> \( {coin.purchasePrice || "-"} € ( \){toDE(coin.purchaseDate) || "-"}) 
-                   | <strong>Verkauf:</strong> \( {coin.sellPrice || "-"} € ( \){toDE(coin.sellDate) || "-"})</p>
-                <p><small>Erstellt: \( {toDE(coin.created)} | Geändert: \){toDE(coin.modified)}</small></p>
-                <button class="btn btn-edit" onclick="editEntry(${i})">Bearbeiten</button>
-                <button class="btn btn-delete" onclick="deleteEntry(${i})">Löschen</button>
-                <div id="formTarget-${i}"></div>
-            `;
-            container.appendChild(div);
+        const lines = text.split('\n').filter(l => l.trim());
+        const headers = lines[0].split(',');
+        coins = lines.slice(1).map(line => {
+            const vals = line.split(',');
+            const obj = {};
+            headers.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim());
+            return obj;
         });
+
+        localStorage.setItem('coinsData', JSON.stringify(coins));
+        localStorage.setItem('lastSyncDate', new Date().toISOString());
+        displayCoins(coins);
+    } catch (e) {
+        loadFromLocalStorage();
+    }
 }
 
-document.getElementById("weightFilter").addEventListener("change", renderCoins);
-
-// --- Neu ---
-function newEntry() {
-    cancelEdit();
-    currentEditIndex = -1;
-    const template = document.getElementById("formTemplate");
-    template.querySelector("#formTitle").textContent = "Neue Münze hinzufügen";
-    clearForm(template);
-    template.classList.add("active");
-    template.scrollIntoView({ behavior: "smooth" });
-}
-
-// --- Bearbeiten (Formular direkt unter der Münze) ---
-function editEntry(index) {
-    cancelEdit();
-    currentEditIndex = index;
-    const coin = coins[index];
-
-    const target = document.getElementById(`formTarget-${index}`);
-    const clone = document.getElementById("formTemplate").cloneNode(true);
-    clone.id = "inlineForm";
-    clone.classList.add("active");
-
-    // Werte füllen
-    clone.querySelector("#name").value = coin.name || "";
-    clone.querySelector("#year").value = coin.year || "";
-    clone.querySelector("#country").value = coin.country || "";
-    clone.querySelector("#faceValue").value = coin.faceValue || "";
-    clone.querySelector("#fineWeight").value = coin.fineWeight || "1 Oz";
-    clone.querySelector("#weight").value = coin.weight || "";
-    clone.querySelector("#material").value = coin.material || "";
-    clone.querySelector("#minted").value = coin.minted || "";
-    clone.querySelector("#purchasePrice").value = coin.purchasePrice || "";
-    clone.querySelector("#purchaseDate").value = coin.purchaseDate || "";
-    clone.querySelector("#sellPrice").value = coin.sellPrice || "";
-    clone.querySelector("#sellDate").value = coin.sellDate || "";
-
-    clone.querySelector("#formTitle").textContent = "Münze bearbeiten";
-
-    // Speichern-Button überschreibt globale Funktion
-    clone.querySelector("button[onclick='saveEntry()']").onclick = () => saveEntry();
-
-    target.appendChild(clone);
-    document.getElementById(`coin-${index}`).classList.add("highlight");
-    document.getElementById(`coin-${index}`).scrollIntoView({ behavior: "smooth", block: "center" });
-}
-
-// --- Speichern ---
-function saveEntry() {
-    const form = document.getElementById("inlineForm") || document.getElementById("formTemplate");
-    const now = new Date().toISOString().slice(0,10);
-
-    const newCoin = {
-        name: form.querySelector("#name").value.trim(),
-        year: form.querySelector("#year").value.trim(),
-        country: form.querySelector("#country").value.trim(),
-        faceValue: form.querySelector("#faceValue").value.trim(),
-        fineWeight: form.querySelector("#fineWeight").value,
-        weight: form.querySelector("#weight").value.trim(),
-        material: form.querySelector("#material").value.trim(),
-        minted: form.querySelector("#minted").value.trim(),
-        purchasePrice: form.querySelector("#purchasePrice").value.trim(),
-        purchaseDate: form.querySelector("#purchaseDate").value,
-        sellPrice: form.querySelector("#sellPrice").value.trim(),
-        sellDate: form.querySelector("#sellDate").value,
-        created: currentEditIndex === -1 ? now : coins[currentEditIndex].created,
-        modified: now
-    };
-
-    if (currentEditIndex === -1) {
-        coins.push(newCoin);
+function loadFromLocalStorage() {
+    const data = localStorage.getItem('coinsData');
+    if (data) {
+        coins = JSON.parse(data);
+        displayCoins(coins);
+        alert('Offline-Modus – Daten aus Cache geladen');
     } else {
-        coins[currentEditIndex] = newCoin;
-    }
-
-    cancelEdit();
-    renderCoins();
-}
-
-// --- Abbrechen ---
-function cancelEdit() {
-    document.querySelectorAll(".coin-entry").forEach(el => el.classList.remove("highlight"));
-    document.getElementById("formTemplate").classList.remove("active");
-    document.querySelectorAll("#inlineForm").forEach(el => el.remove());
-    clearForm(document.getElementById("formTemplate"));
-}
-
-// --- Löschen ---
-function deleteEntry(i) {
-    if (confirm("Münze wirklich löschen?")) {
-        coins.splice(i, 1);
-        cancelEdit();
-        renderCoins();
+        alert('Keine Daten – bitte online gehen');
     }
 }
 
-// --- Formular leeren ---
-function clearForm(container) {
-    container.querySelectorAll("input, select").forEach(el => {
-        if (el.type === "date") el.value = "";
-        else if (el.tagName === "SELECT") el.value = "1 Oz";
-        else el.value = "";
+function displayCoins(list) {
+    const container = document.getElementById('coinList');
+    container.innerHTML = '';
+
+    list.forEach((coin, idx) => {
+        const card = document.createElement('div');
+        card.className = 'coin-card';
+
+        card.innerHTML = `
+            <h3>#\( {coin.ID} – \){coin.Coin_Name} (${coin.Denomination})</h3>
+            <p><strong>\( {coin.Metal_Type}</strong> • \){coin.Country} • ${coin.Face_Value || 'kein Nennwert'}</p>
+            <p>Gewicht: \( {coin.Total_Weight_g} g | Feingewicht: \){coin.Fine_Weight_oz} oz | Feingehalt: ${coin.Fineness}</p>
+            <p>Ø \( {coin.Diameter_mm} mm × \){coin.Thickness_mm} mm | Rand: \( {coin.Edge} | Magnetismus: \){coin.Magnetism}</p>
+            <p>Jahrgänge: ${coin.Years_Issued}</p>
+            <p>${coin.Description}</p>
+            \( {coin.Notes ? `<p><em> \){coin.Notes}</em></p>` : ''}
+            <div class="images">
+                \( {coin.Front_Image_Path ? `<img src=" \){coin.Front_Image_Path}" class="coin-thumb" onclick="openModal('${coin.Front_Image_Path}')">` : '<p>kein Front-Bild</p>'}
+                \( {coin.Back_Image_Path ? `<img src=" \){coin.Back_Image_Path}" class="coin-thumb" onclick="openModal('${coin.Back_Image_Path}')">` : '<p>kein Back-Bild</p>'}
+            </div>
+            <small>Erstellt: \( {formatDate(coin.Created_Date)} | Geändert: \){formatDate(coin.Modified_Date)}</small><br>
+            <button onclick="editCoin(${idx})">Bearbeiten</button>
+        `;
+
+        container.appendChild(card);
     });
 }
 
-// Initiales Rendern
-renderCoins();
+function openModal(src) {
+    const modal = document.getElementById('imageModal');
+    const img = document.getElementById('modalImage');
+    img.src = src;
+    modal.style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('imageModal').style.display = 'none';
+}
+
+function showAddForm() {
+    document.getElementById('formTitle').textContent = 'Münze hinzufügen';
+    document.getElementById('addForm').style.display = 'block';
+    document.getElementById('coinForm').reset();
+    editingIndex = -1;
+    const nextId = String(Math.max(...coins.map(c => +c.ID || 0), 0) + 1).padStart(3, '0');
+    document.querySelector('[name="ID"]').value = nextId;
+    document.getElementById('addForm').scrollIntoView({ behavior: 'smooth' });
+}
+
+function editCoin(index) {
+    document.getElementById('formTitle').textContent = 'Münze bearbeiten';
+    showAddForm();
+    const form = document.getElementById('coinForm');
+    const c = coins[index];
+    Object.keys(c).forEach(k => {
+        if (form.elements[k]) form.elements[k].value = c[k] || '';
+    });
+    editingIndex = index;
+}
+
+function cancelForm() {
+    document.getElementById('addForm').style.display = 'none';
+}
+
+function saveCoin() {
+    const form = document.getElementById('coinForm');
+    const data = {};
+    let isNew = editingIndex === -1;
+
+    for (let el of form.elements) {
+        if (el.name) data[el.name] = el.value.trim();
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    data.Created_Date = isNew ? today : coins[editingIndex].Created_Date;
+    data.Modified_Date = today;
+
+    const id = data.ID.padStart(3, '0');
+    data.Front_Image_Path = data.Front_URL || (form.Front_Image.files[0] ? `images/${id}_front.jpg` : (isNew ? '' : coins[editingIndex].Front_Image_Path));
+    data.Back_Image_Path = data.Back_URL || (form.Back_Image.files[0] ? `images/${id}_back.jpg` : (isNew ? '' : coins[editingIndex].Back_Image_Path));
+
+    if (isNew) coins.push(data);
+    else coins[editingIndex] = data;
+
+    localStorage.setItem('coinsData', JSON.stringify(coins));
+    localStorage.setItem('lastSyncDate', new Date().toISOString());
+
+    cancelForm();
+    displayCoins(coins);
+    alert('Münze gespeichert!');
+}
+
+function downloadCSV() {
+    const headers = ["ID","Coin_Name","Metal_Type","Denomination","Country","Mint","Face_Value","Total_Weight_g","Fine_Weight_oz","Fineness","Diameter_mm","Thickness_mm","Edge","Magnetism","Years_Issued","Description","Notes","Created_Date","Modified_Date","Front_Image_Path","Back_Image_Path"];
+    const rows = coins.map(c) => headers.map(h => `"${(c[h] || '').replace(/"/g, '""')}"`).join(',');
+    const csv = headers.join(',') + '\n' + coins.map(rows).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'muenzen-katalog.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function showAll(type) {
+    displayCoins(coins.filter(c => c.Metal_Type === type));
+}
+
+function searchCoins() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = coins.filter(c =>
+        c.Coin_Name.toLowerCase().includes(q) ||
+        c.Denomination.toLowerCase().includes(q) ||
+        c.ID.includes(q)
+    );
+    displayCoins(filtered);
+}
+
+// Start
+loadCSV();
