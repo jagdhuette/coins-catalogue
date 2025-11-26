@@ -9,58 +9,52 @@ body {
 
 .container { max-width: 1400px; margin: 0 auto; }
 
-.header {
-    text-align: center;
-    margin-bottom: 30px;
-    color: #1a1a1a;
-}
-.header h1 { font-size: 2.8rem; font-weight: 700; color: #d4af37; }
-.header h2 { font-size: 1.4rem; color: #555; margin-top: 8px; }
+.header h1 { font-size: 3rem; color: #d4af37; text-align: center; }
+.header h2 { font-size: 1.5rem; color: #555; text-align: center; margin-top: 8px; }
 
 .nav {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
     justify-content: center;
-    margin-bottom: 30px;
+    margin: 30px 0;
+    align-items: center;
 }
-.nav button, .nav input {
+.nav button, .nav select, .nav input {
     padding: 12px 20px;
     border: none;
     border-radius: 12px;
-    background: white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    cursor: pointer;
     font-size: 1rem;
-    transition: all 0.3s;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
-.nav button:hover { background: #d4af37; color: white; transform: translateY(-2px); }
-.download-btn { background: #28a745 !important; color: white; }
+.nav button {
+    background: #007bff; color: white; font-weight: 600;
+}
+.nav button:hover { background: #0056b3; transform: translateY(-2px); }
+.download-btn { background: #28a745 !important; }
+.reset-btn { background: #6c757d !important; }
+.nav select { background: white; }
+.nav input { width: 220px; }
 
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-    gap: 24px;
-}
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 24px; }
 
 .coin-card {
     background: white;
     border-radius: 16px;
     padding: 20px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-    transition: transform 0.3s;
+    transition: all 0.3s;
 }
-.coin-card:hover { transform: translateY(-8px); }
+.coin-card:hover { transform: translateY(-8px); box-shadow: 0 12px 30px rgba(0,0,0,0.18); }
 
 .coin-card h3 {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     color: #1a1a1a;
     margin-bottom: 12px;
     border-bottom: 2px solid #d4af37;
     padding-bottom: 8px;
 }
-
-.coin-card p { margin: 8px 0; line-height: 1.5; }
 
 .images {
     display: flex;
@@ -69,7 +63,6 @@ body {
     margin: 16px 0;
     flex-wrap: wrap;
 }
-
 .coin-thumb {
     width: 130px;
     height: 130px;
@@ -77,56 +70,27 @@ body {
     border-radius: 12px;
     border: 3px solid #ddd;
     cursor: zoom-in;
-    transition: all 0.3s;
+    transition: 0.3s;
 }
 .coin-thumb:hover { border-color: #d4af37; transform: scale(1.05); }
 
-small { display: block; margin-top: 12px; color: #666; font-size: 0.9rem; }
-
-button {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    margin-top: 10px;
-}
-button:hover { background: #0056b3; }
+small { display: block; margin-top: 12px; color: #666; }
 
 .form-card {
-    display: none;
     background: white;
     padding: 30px;
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    margin: 30px auto;
+    margin: 40px auto;
     max-width: 900px;
 }
 
-#formTitle { color: #d4af37; margin-bottom: 20px; text-align: center; font-size: 1.8rem; }
+#formTitle { color: #d4af37; text-align: center; font-size: 2rem; margin-bottom: 20px; }
 
 .form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 16px;
-}
-
-.form-grid label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 600;
-}
-
-.form-grid input,
-.form-grid textarea,
-.form-grid select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
 }
 
 .form-actions {
@@ -136,39 +100,12 @@ button:hover { background: #0056b3; }
     display: flex;
     justify-content: center;
 }
-
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.9);
-    justify-content: center;
-    align-items: center;
+.form-actions button {
+    padding: 12px 30px;
+    font-size: 1.1rem;
 }
 
-.modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 16px;
-    max-width: 80%;
-    max-height: 85vh;
-    text-align: center;
-    position: relative;
-}
-
-.modal-content img {
-    max-width: 100%;
-    max-height: 75vh;
-    border-radius: 12px;
-}
-
-.close {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 40px;
-    color: white;
-    cursor: pointer;
-}
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
+.modal-content { background: white; padding: 20px; border-radius: 16px; max-width: 80%; max-height: 85vh; text-align: center; position: relative; }
+.modal-content img { max-width: 100%; max-height: 75vh; border-radius: 12px; }
+.close { position: absolute; top: 10px; right: 25px; font-size: 40px; color: white; cursor: pointer; font-weight: bold; }
