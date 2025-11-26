@@ -1,44 +1,174 @@
-body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-h1, h2 { color: #333; }
-.container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
-
-.filter-bar { margin: 20px 0; padding: 15px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; flex-wrap: wrap; gap: 15px; }
-.filter-bar label { font-weight: bold; margin-right: 8px; }
-
-.btn {
-    padding: 9px 15px; margin: 0 5px; cursor: pointer; border: none; border-radius: 5px; color: white; font-weight: bold;
-    transition: all 0.2s;
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    color: #333;
+    padding: 20px;
+    min-height: 100vh;
 }
-.btn:hover { opacity: 0.9; transform: translateY(-1px); }
-.btn:active { transform: translateY(0); }
-.btn-add    { background: #007bff; }
-.btn-save   { background: #28a745; }
-.btn-cancel { background: #6c757d; }
-.btn-edit   { background: #28a745; }
-.btn-delete { background: #dc3545; }
 
-.form-container { margin: 30px 0; padding: 20px; background: #f0f8ff; border-radius: 8px; display: none; border: 1px solid #b0d4f1; }
-.form-container.active { display: block; }
-.form-row { margin: 12px 0; display: flex; align-items: center; }
-.form-row label { width: 180px; font-weight: bold; }
-.form-row input, .form-row select { padding: 8px; width: 260px; border: 1px solid #ccc; border-radius: 4px; }
+.container { max-width: 1400px; margin: 0 auto; }
 
-.coin-entry {
-    border: 2px solid transparent;
-    padding: 15px;
-    margin-bottom: 15px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #1a1a1a;
+}
+.header h1 { font-size: 2.8rem; font-weight: 700; color: #d4af37; }
+.header h2 { font-size: 1.4rem; color: #555; margin-top: 8px; }
+
+.nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+.nav button, .nav input {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    cursor: pointer;
+    font-size: 1rem;
     transition: all 0.3s;
 }
-.coin-entry.highlight {
-    border-color: #007bff;
-    background: #e7f3ff;
-    box-shadow: 0 4px 12px rgba(0,123,255,0.2);
-}
-.coin-entry h3 { margin: 0 0 10px 0; color: #007bff; }
-.coin-entry p { margin: 6px 0; }
-.coin-entry small { color: #666; }
+.nav button:hover { background: #d4af37; color: white; transform: translateY(-2px); }
+.download-btn { background: #28a745 !important; color: white; }
 
-#csvStatus { margin-left: 15px; font-weight: bold; color: #28a745; }
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 24px;
+}
+
+.coin-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    transition: transform 0.3s;
+}
+.coin-card:hover { transform: translateY(-8px); }
+
+.coin-card h3 {
+    font-size: 1.5rem;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #d4af37;
+    padding-bottom: 8px;
+}
+
+.coin-card p { margin: 8px 0; line-height: 1.5; }
+
+.images {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+}
+
+.coin-thumb {
+    width: 130px;
+    height: 130px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 3px solid #ddd;
+    cursor: zoom-in;
+    transition: all 0.3s;
+}
+.coin-thumb:hover { border-color: #d4af37; transform: scale(1.05); }
+
+small { display: block; margin-top: 12px; color: #666; font-size: 0.9rem; }
+
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 10px;
+}
+button:hover { background: #0056b3; }
+
+.form-card {
+    display: none;
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    margin: 30px auto;
+    max-width: 900px;
+}
+
+#formTitle { color: #d4af37; margin-bottom: 20px; text-align: center; font-size: 1.8rem; }
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.form-grid label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.form-grid input,
+.form-grid textarea,
+.form-grid select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.form-actions {
+    text-align: center;
+    margin-top: 30px;
+    gap: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    max-width: 80%;
+    max-height: 85vh;
+    text-align: center;
+    position: relative;
+}
+
+.modal-content img {
+    max-width: 100%;
+    max-height: 75vh;
+    border-radius: 12px;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 40px;
+    color: white;
+    cursor: pointer;
+}
