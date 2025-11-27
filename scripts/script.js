@@ -1,4 +1,4 @@
-// scripts/script.js – Vollständig korrigierte Version mit kombinierter Filterlogik, Formular-Update und Broken-Image-Fix (27.11.2025)
+// scripts/script.js – Vollständig korrigierte Version (27.11.2025)
 let coins = [];
 let editingIndex = -1; 
 let currentMetalFilter = 'all'; 
@@ -8,8 +8,7 @@ const CSV_URL = 'https://raw.githubusercontent.com/jagdhuette/coins-catalogue/ma
 function formatDate(d) {
     if (!d) return 'unbekannt';
     const [y, m, day] = d.split('-');
-    // KORREKTUR: Template Literal Syntax behoben
-    return `${day}.${m}.${y}`; 
+    return `${day}.${m}.${y}`;
 }
 
 async function loadCSV() {
@@ -38,19 +37,23 @@ async function loadCSV() {
     }
 }
 
-// NEU: Hilfsfunktion zum Erstellen von Bildern mit Broken-Image-Handling
+// FIX: Hilfsfunktion zum Erstellen von Bildern mit Broken-Image-Handling
 function createCoinImage(path) {
     if (!path) return '';
     
-    // Dummymünze HTML als Fallback (muss mit \' escapen)
-    const dummyHtml = '<div class="dummy-coin">Bild nicht verfügbar</div>'; 
+    // Dummymünze HTML als Fallback. Verwende single quotes (') für class, 
+    // um Konflikte mit dem onerror-Attribut zu vermeiden.
+    const dummyHtml = "<div class='dummy-coin'>Bild nicht verfügbar</div>"; 
     
-    // Fügt onerror-Handler hinzu, um bei Ladefehler die Dummymünze anzuzeigen
+    // Escapen der einfachen Anführungszeichen ('), damit sie den 'this.outerHTML' String im DOM nicht vorzeitig beenden.
+    const escapedDummyHtml = dummyHtml.replace(/'/g, "\\'");
+    
+    // Fügt onerror-Handler hinzu, um bei Ladefehler die Dummymünze anzuzeigen.
     return `<img 
         src="${path}" 
         class="coin-thumb" 
         onclick="bigImg('${path}')"
-        onerror="this.outerHTML='${dummyHtml.replace(/'/g, "\\'")}'"
+        onerror="this.outerHTML='${escapedDummyHtml}'"
     >`;
 }
 
@@ -64,7 +67,6 @@ function showCoins(list) {
     list.forEach((c, i) => {
         const card = document.createElement('div');
         card.className = 'coin-card';
-        // KORREKTUR: Template Literal Syntax behoben
         card.innerHTML = `
             <h3>#${c.ID} – ${c.Coin_Name} (${c.Denomination})</h3>
             <p><strong>${c.Metal_Type}</strong> • ${c.Country} • ${c.Face_Value || ''}</p>
@@ -90,15 +92,11 @@ function closeModal() {
     document.getElementById('imageModal').style.display = 'none';
 }
 
-// ----------------------------------------------------
-// UPDATED: Münze bearbeiten (Formular-Update für 2-spaltige Felder)
-// ----------------------------------------------------
 function editCoin(i) {
     editingIndex = i;
     const c = coins[i];
     document.getElementById('editContainer').style.display = 'block';
     
-    // Definiere die leeren Werte für Felder, die eventuell fehlen
     const empty = { Magnetism: '', Years_Issued: '', Description: '', Notes: '', Front_Image_Path: '', Back_Image_Path: '', Face_Value: '' };
 
     document.getElementById('editContainer').innerHTML = `
@@ -142,14 +140,10 @@ function editCoin(i) {
     document.getElementById('editContainer').scrollIntoView({behavior:'smooth'});
 }
 
-// ----------------------------------------------------
-// UPDATED: Münze hinzufügen (Formular-Update für 2-spaltige Felder)
-// ----------------------------------------------------
 function showAddForm() {
     console.log('Zeige Formular zum Hinzufügen');
     editingIndex = -1; 
     
-    // Leere Vorlage für die neue Münze
     const emptyCoin = {
         ID: '', Coin_Name: '', Metal_Type: 'Gold', Denomination: '', Country: '', Mint: '', 
         Face_Value: '', Total_Weight_g: '', Fine_Weight_oz: '', Fineness: '', 
@@ -200,9 +194,6 @@ function showAddForm() {
     document.getElementById('editContainer').scrollIntoView({behavior:'smooth'});
 }
 
-// ----------------------------------------------------
-// Speichert eine Münze (Add & Edit Logik)
-// ----------------------------------------------------
 function saveCoin() {
     const f = document.getElementById('editForm');
     const d = {};
@@ -215,11 +206,9 @@ function saveCoin() {
     let message = '';
     
     if (editingIndex !== -1) {
-        // EDITIEREN einer existierenden Münze
         coins[editingIndex] = d;
         message = `Münze #${d.ID} erfolgreich bearbeitet!`;
     } else {
-        // HINZUFÜGEN einer neuen Münze
         const maxId = coins.reduce((max, coin) => Math.max(max, parseInt(coin.ID) || 0), 0);
         const newId = (maxId + 1).toString().padStart(3, '0');
         
@@ -253,10 +242,6 @@ function downloadCSV() {
     URL.revokeObjectURL(url);
 }
 
-// ----------------------------------------------------
-// ZENTRALE FILTERFUNKTION
-// ----------------------------------------------------
-
 function applyFilters() {
     const weight = document.getElementById('weightFilter').value;
     const search = document.getElementById('searchInput').value.toLowerCase();
@@ -264,9 +249,7 @@ function applyFilters() {
     
     let filteredList = coins.filter(c => {
         const metalMatch = (metal === 'all' || c.Metal_Type === metal);
-        
         const weightMatch = (!weight || c.Fine_Weight_oz == weight);
-        
         const searchMatch = !search || 
             c.Coin_Name.toLowerCase().includes(search) ||
             c.Country.toLowerCase().includes(search) ||
@@ -277,10 +260,6 @@ function applyFilters() {
     
     showCoins(filteredList);
 }
-
-// ----------------------------------------------------
-// FILTER HANDLER UPDATES
-// ----------------------------------------------------
 
 function showAll(type) {
     console.log(`Filtere nach: ${type}`);
@@ -306,6 +285,4 @@ function resetFilters() {
     applyFilters();
 }
 
-
-// Start
 loadCSV();
