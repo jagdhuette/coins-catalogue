@@ -1,12 +1,15 @@
-// scripts/script.js – Vollständig korrigierte Version (27.11.2025)
+// scripts/script.js – Vollständig korrigierte Version mit kombinierter Filterlogik (27.11.2025)
 let coins = [];
 let editingIndex = -1;
+// NEU: Globale Variable, um den ausgewählten Metallfilter zu speichern
+let currentMetalFilter = 'all'; 
+
 const CSV_URL = 'https://raw.githubusercontent.com/jagdhuette/coins-catalogue/main/data/catalog.csv';
 
 function formatDate(d) {
     if (!d) return 'unbekannt';
     const [y, m, day] = d.split('-');
-    // KORREKTUR 1: Template Literal Syntax behoben
+    // KORREKTUR: Template Literal Syntax behoben
     return `${day}.${m}.${y}`;
 }
 
@@ -46,7 +49,7 @@ function showCoins(list) {
     list.forEach((c, i) => {
         const card = document.createElement('div');
         card.className = 'coin-card';
-        // KORREKTUR 2: Template Literal Syntax behoben
+        // KORREKTUR: Template Literal Syntax behoben
         card.innerHTML = `
             <h3>#${c.ID} – ${c.Coin_Name} (${c.Denomination})</h3>
             <p><strong>${c.Metal_Type}</strong> • ${c.Country} • ${c.Face_Value || ''}</p>
@@ -138,73 +141,59 @@ function downloadCSV() {
     URL.revokeObjectURL(url);
 }
 
-// IMPLEMENTIERUNG 1: Filtern nach Metalltyp (setzt alle anderen Filter zurück)
+// ----------------------------------------------------
+// NEUE ZENTRALE FILTERFUNKTION
+// ----------------------------------------------------
+
+function applyFilters() {
+    const weight = document.getElementById('weightFilter').value;
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const metal = currentMetalFilter; // Status aus der globalen Variable holen
+    
+    let filteredList = coins.filter(c => {
+        // 1. Filter nach Metall (UND)
+        const metalMatch = (metal === 'all' || c.Metal_Type === metal);
+        
+        // 2. Filter nach Gewicht (UND)
+        const weightMatch = (!weight || c.Fine_Weight_oz == weight);
+        
+        // 3. Filter nach Suche (UND)
+        const searchMatch = !search || 
+            c.Coin_Name.toLowerCase().includes(search) ||
+            c.Country.toLowerCase().includes(search) ||
+            c.Denomination.toLowerCase().includes(search);
+        
+        // Alle Kriterien müssen wahr sein (AND-Verknüpfung)
+        return metalMatch && weightMatch && searchMatch;
+    });
+    
+    showCoins(filteredList);
+}
+
+// ----------------------------------------------------
+// FILTER HANDLER UPDATES
+// ----------------------------------------------------
+
+// UPDATED: Setzt den Metall-Filter und wendet ALLE Filter an
 function showAll(type) {
     console.log(`Filtere nach: ${type}`);
-    // Setzt andere Filter zurück (einfachere Filterlogik)
-    document.getElementById('weightFilter').value = '';
-    document.getElementById('searchInput').value = '';
-    
-    let filteredList = coins;
-    if (type !== 'all') {
-        filteredList = coins.filter(c => c.Metal_Type === type);
-    }
-    showCoins(filteredList);
+    currentMetalFilter = type; 
+    applyFilters();
 }
 
-// IMPLEMENTIERUNG 2: Filtern nach Gewicht
+// UPDATED: Wird bei Änderung des Select-Feldes aufgerufen und wendet ALLE Filter an
 function filterByWeight() {
     console.log('Filtere nach Gewicht');
-    const weight = document.getElementById('weightFilter').value;
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    
-    let filteredList = coins;
-    
-    // Zuerst nach Gewicht filtern
-    if (weight) {
-        filteredList = filteredList.filter(c => c.Fine_Weight_oz == weight);
-    }
-    
-    // Dann Suchfilter anwenden (um Kombinierbarkeit zu simulieren)
-    if (search) {
-        filteredList = filteredList.filter(c => 
-            c.Coin_Name.toLowerCase().includes(search) ||
-            c.Country.toLowerCase().includes(search) ||
-            c.Denomination.toLowerCase().includes(search)
-        );
-    }
-    // HINWEIS: Der Metallfilter-Status von showAll() wird hierbei ignoriert.
-    
-    showCoins(filteredList);
+    applyFilters();
 }
 
-// IMPLEMENTIERUNG 3: Suche nach Namen/Land
+// UPDATED: Wird bei Eingabe in das Suchfeld aufgerufen und wendet ALLE Filter an
 function searchCoins() {
     console.log('Suche Münzen');
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    const weight = document.getElementById('weightFilter').value;
-    
-    let filteredList = coins;
-    
-    // Zuerst nach Suche filtern
-    if (search) {
-        filteredList = filteredList.filter(c => 
-            c.Coin_Name.toLowerCase().includes(search) ||
-            c.Country.toLowerCase().includes(search) ||
-            c.Denomination.toLowerCase().includes(search)
-        );
-    }
-    
-    // Dann Gewichtsfilter anwenden (um Kombinierbarkeit zu simulieren)
-    if (weight) {
-        filteredList = filteredList.filter(c => c.Fine_Weight_oz == weight);
-    }
-    // HINWEIS: Der Metallfilter-Status von showAll() wird hierbei ignoriert.
-    
-    showCoins(filteredList);
+    applyFilters();
 }
 
-// IMPLEMENTIERUNG 4: Formular zum Hinzufügen anzeigen
+// Implementierung für das Hinzufügen-Formular
 function showAddForm() {
     console.log('Zeige Formular zum Hinzufügen');
     document.getElementById('editContainer').style.display = 'block';
@@ -220,14 +209,14 @@ function showAddForm() {
     document.getElementById('mainContent').style.display = 'none';
 }
 
-// IMPLEMENTIERUNG 5: Filter zurücksetzen
+// UPDATED: Setzt alle Filter zurück und wendet die Filterung an
 function resetFilters() {
     console.log('Filter zurückgesetzt');
     document.getElementById('weightFilter').value = '';
     document.getElementById('searchInput').value = '';
-    showCoins(coins);
+    currentMetalFilter = 'all'; // Setzt Metallfilter zurück
+    applyFilters();
 }
-
 
 // Start
 loadCSV();
