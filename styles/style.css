@@ -74,6 +74,30 @@ body {
 }
 .coin-thumb:hover { border-color: #d4af37; transform: scale(1.05); }
 
+/* ... (Bestehender Code) ... */
+
+.coin-thumb:hover { border-color: #d4af37; transform: scale(1.05); }
+
+/* NEU: Dummy Coin Style für broken images */
+.dummy-coin {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%; /* Rund wie eine Münze */
+    background: #e9ecef;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    text-align: center;
+    border: 3px dashed #6c757d;
+    box-sizing: border-box;
+}
+
+small { display: block; margin-top: 12px; color: #666; }
+
+/* ... (Bestehender Code) ... */
+
 small { display: block; margin-top: 12px; color: #666; }
 
 .form-card {
