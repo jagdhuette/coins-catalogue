@@ -74,10 +74,6 @@ body {
 }
 .coin-thumb:hover { border-color: #d4af37; transform: scale(1.05); }
 
-/* ... (Bestehender Code) ... */
-
-.coin-thumb:hover { border-color: #d4af37; transform: scale(1.05); }
-
 /* NEU: Dummy Coin Style für broken images */
 .dummy-coin {
     width: 130px;
@@ -93,10 +89,6 @@ body {
     border: 3px dashed #6c757d;
     box-sizing: border-box;
 }
-
-small { display: block; margin-top: 12px; color: #666; }
-
-/* ... (Bestehender Code) ... */
 
 small { display: block; margin-top: 12px; color: #666; }
 
