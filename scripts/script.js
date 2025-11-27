@@ -1,4 +1,4 @@
-// scripts/script.js – 100 % funktionierend (26.11.2025)
+// scripts/script.js – Korrigiert (27.11.2025, gemini, mschwarz)
 let coins = [];
 let editingIndex = -1;
 const CSV_URL = 'https://raw.githubusercontent.com/jagdhuette/coins-catalogue/main/data/catalog.csv';
@@ -6,7 +6,7 @@ const CSV_URL = 'https://raw.githubusercontent.com/jagdhuette/coins-catalogue/ma
 function formatDate(d) {
     if (!d) return 'unbekannt';
     const [y, m, day] = d.split('-');
-    return `\( {day}. \){m}.${y}`;
+    return `${day}.${m}.${y}`;
 }
 
 async function loadCSV() {
@@ -45,16 +45,17 @@ function showCoins(list) {
     list.forEach((c, i) => {
         const card = document.createElement('div');
         card.className = 'coin-card';
+        // KORREKTUR: Korrekte Template Literal Syntax ${...} verwendet
         card.innerHTML = `
-            <h3>#\( {c.ID} – \){c.Coin_Name} (${c.Denomination})</h3>
-            <p><strong>\( {c.Metal_Type}</strong> • \){c.Country} • ${c.Face_Value || ''}</p>
-            <p>Feingewicht: \( {c.Fine_Weight_oz} oz | Gesamt: \){c.Total_Weight_g} g</p>
-            <p>Ø \( {c.Diameter_mm} × \){c.Thickness_mm} mm | Rand: ${c.Edge}</p>
+            <h3>#${c.ID} – ${c.Coin_Name} (${c.Denomination})</h3>
+            <p><strong>${c.Metal_Type}</strong> • ${c.Country} • ${c.Face_Value || ''}</p>
+            <p>Feingewicht: ${c.Fine_Weight_oz} oz | Gesamt: ${c.Total_Weight_g} g</p>
+            <p>Ø ${c.Diameter_mm} × ${c.Thickness_mm} mm | Rand: ${c.Edge}</p>
             <div class="images">
-                \( {c.Front_Image_Path ? `<img src=" \){c.Front_Image_Path}" class="coin-thumb" onclick="bigImg('${c.Front_Image_Path}')">` : ''}
-                \( {c.Back_Image_Path ? `<img src=" \){c.Back_Image_Path}" class="coin-thumb" onclick="bigImg('${c.Back_Image_Path}')">` : ''}
+                ${c.Front_Image_Path ? `<img src="${c.Front_Image_Path}" class="coin-thumb" onclick="bigImg('${c.Front_Image_Path}')">` : ''}
+                ${c.Back_Image_Path ? `<img src="${c.Back_Image_Path}" class="coin-thumb" onclick="bigImg('${c.Back_Image_Path}')">` : ''}
             </div>
-            <small>Erstellt: \( {formatDate(c.Created_Date)} | Geändert: \){formatDate(c.Modified_Date)}</small><br><br>
+            <small>Erstellt: ${formatDate(c.Created_Date)} | Geändert: ${formatDate(c.Modified_Date)}</small><br><br>
             <button onclick="editCoin(${i})">Bearbeiten</button>
         `;
         box.appendChild(card);
@@ -135,6 +136,33 @@ function downloadCSV() {
     a.click();
     URL.revokeObjectURL(url);
 }
+
+// FEHLENDE FUNKTIONEN hinzugefügt, um ReferenceError zu vermeiden
+function showAll(type) {
+    // Implementierung fehlt
+    console.log(`Filtere nach: ${type}`);
+}
+
+function filterByWeight() {
+    // Implementierung fehlt
+    console.log('Filtere nach Gewicht');
+}
+
+function showAddForm() {
+    // Implementierung fehlt
+    console.log('Zeige Formular zum Hinzufügen');
+}
+
+function searchCoins() {
+    // Implementierung fehlt
+    console.log('Suche Münzen');
+}
+
+function resetFilters() {
+    // Implementierung fehlt
+    console.log('Filter zurückgesetzt');
+}
+
 
 // Start
 loadCSV();
