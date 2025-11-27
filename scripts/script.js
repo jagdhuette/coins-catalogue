@@ -41,8 +41,7 @@ async function loadCSV() {
 function createCoinImage(path) {
     if (!path) return '';
     
-    // Dummymünze HTML als Fallback. Verwende single quotes (') für class, 
-    // um Konflikte mit dem onerror-Attribut zu vermeiden.
+    // Dummymünze HTML als Fallback. Verwende einfache Anführungszeichen ('), um Konflikte mit dem onerror-Attribut zu vermeiden.
     const dummyHtml = "<div class='dummy-coin'>Bild nicht verfügbar</div>"; 
     
     // Escapen der einfachen Anführungszeichen ('), damit sie den 'this.outerHTML' String im DOM nicht vorzeitig beenden.
@@ -92,11 +91,15 @@ function closeModal() {
     document.getElementById('imageModal').style.display = 'none';
 }
 
+// ----------------------------------------------------
+// UPDATED: Münze bearbeiten (Mit 2-spaltigen Feldern)
+// ----------------------------------------------------
 function editCoin(i) {
     editingIndex = i;
     const c = coins[i];
     document.getElementById('editContainer').style.display = 'block';
     
+    // Definiere die leeren Werte für Felder, die eventuell fehlen
     const empty = { Magnetism: '', Years_Issued: '', Description: '', Notes: '', Front_Image_Path: '', Back_Image_Path: '', Face_Value: '' };
 
     document.getElementById('editContainer').innerHTML = `
@@ -140,6 +143,9 @@ function editCoin(i) {
     document.getElementById('editContainer').scrollIntoView({behavior:'smooth'});
 }
 
+// ----------------------------------------------------
+// UPDATED: Münze hinzufügen (Mit 2-spaltigen Feldern)
+// ----------------------------------------------------
 function showAddForm() {
     console.log('Zeige Formular zum Hinzufügen');
     editingIndex = -1; 
